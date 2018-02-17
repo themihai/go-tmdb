@@ -55,7 +55,7 @@ func getTmdb(url string, payload interface{}) (interface{}, error) {
 		return payload, err
 	}
 
-	defer res.Body.Close()  //Clean up
+	defer res.Body.Close() //Clean up
 
 	if res.Header.Get(`x-ratelimit-remaining`) == `0` { // Out of requests for this period
 		reset := res.Header.Get(`x-ratelimit-reset`)
@@ -65,12 +65,11 @@ func getTmdb(url string, payload interface{}) (interface{}, error) {
 			rateLimitReset = time.Unix(iReset+1, 0)
 		}
 	}
-  
+
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil { // Failed to read body
 		return payload, err
 	}
-	defer res.Body.Close()
 
 	if res.StatusCode >= 200 && res.StatusCode < 300 { // Success!
 		json.Unmarshal(body, &payload)
@@ -81,7 +80,7 @@ func getTmdb(url string, payload interface{}) (interface{}, error) {
 	var status apiStatus
 	err = json.Unmarshal(body, &status)
 	if err != nil {
-		return payload, err
+		return payload, fmt.Errorf("body %s, err %s", body, err)
 	}
 	return payload, fmt.Errorf("Code (%d): %s", status.Code, status.Message)
 }
